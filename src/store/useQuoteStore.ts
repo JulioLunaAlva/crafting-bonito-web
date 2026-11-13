@@ -9,6 +9,14 @@ import {
   QuoteItem,
   ScentId,
 } from '../types/quote';
+import { calculateItemPricing } from '../utils/pricing';
+
+export interface ToastNotification {
+  id: number;
+  productName: string;
+  quantity: number;
+  subtotal: number;
+}
 
 interface QuoteStoreState {
   items: QuoteItem[];
@@ -20,6 +28,8 @@ interface QuoteStoreState {
   editingItemId: string | null;
   customizerInitialQty: number;
   activeCollection: CollectionFilter;
+  cartPulseKey: number;
+  toastNotification: ToastNotification | null;
 
   openCustomizer: (product: Product, existingItemId?: string, initialQty?: number) => void;
   closeCustomizer: () => void;
@@ -27,6 +37,7 @@ interface QuoteStoreState {
   closeDrawer: () => void;
   toggleDrawer: () => void;
   setActiveCollection: (collection: CollectionFilter) => void;
+  dismissToast: () => void;
 
   addOrUpdateItem: (payload: {
     product: Product;
@@ -59,7 +70,9 @@ export const useQuoteStore = create<QuoteStoreState>()(
       customizerProduct: null,
       editingItemId: null,
       customizerInitialQty: MIN_ORDER_PER_MODEL,
-      activeCollection: 'eventos',
+      activeCollection: 'navidad',
+      cartPulseKey: 0,
+      toastNotification: null,
 
       openCustomizer: (product, existingItemId, initialQty) => {
         set({
@@ -69,6 +82,7 @@ export const useQuoteStore = create<QuoteStoreState>()(
             MIN_ORDER_PER_MODEL,
             Math.floor(initialQty ?? MIN_ORDER_PER_MODEL)
           ),
+          isDrawerOpen: false,
         });
       },
 
@@ -80,10 +94,11 @@ export const useQuoteStore = create<QuoteStoreState>()(
         });
       },
 
-      openDrawer: () => set({ isDrawerOpen: true }),
+      openDrawer: () => set({ isDrawerOpen: true, customizerProduct: null, toastNotification: null }),
       closeDrawer: () => set({ isDrawerOpen: false }),
       toggleDrawer: () => set((state) => ({ isDrawerOpen: !state.isDrawerOpen })),
       setActiveCollection: (collection) => set({ activeCollection: collection }),
+      dismissToast: () => set({ toastNotification: null }),
 
       addOrUpdateItem: ({
         product,
@@ -95,8 +110,17 @@ export const useQuoteStore = create<QuoteStoreState>()(
       }) => {
         const cleanQty = Math.max(MIN_ORDER_PER_MODEL, Math.floor(quantity || MIN_ORDER_PER_MODEL));
         const cleanMessage = cleanQty > FREE_PACKAGING_THRESHOLD ? customLabelMessage : '';
+        const pricing = calculateItemPricing(product, cleanQty, scent, packaging);
 
         set((state) => {
+          const nextPulse = state.cartPulseKey + 1;
+          const nextToast: ToastNotification = {
+            id: Date.now(),
+            productName: product.name,
+            quantity: cleanQty,
+            subtotal: pricing.lineSubtotal,
+          };
+
           if (editingItemId) {
             return {
               items: state.items.map((item) =>
@@ -113,12 +137,12 @@ export const useQuoteStore = create<QuoteStoreState>()(
               ),
               customizerProduct: null,
               editingItemId: null,
-              isDrawerOpen: true,
+              isDrawerOpen: false,
+              cartPulseKey: nextPulse,
+              toastNotification: nextToast,
             };
           }
 
-          // Si ya existe exactamente el mismo modelo + aroma + empaque, acumulamos cantidad;
-          // si tiene configuración distinta, lo agregamos como nueva partida para permitir variantes.
           const matchingExisting = state.items.find(
             (item) =>
               item.product.id === product.id &&
@@ -128,15 +152,21 @@ export const useQuoteStore = create<QuoteStoreState>()(
           );
 
           if (matchingExisting) {
+            const combinedQty = matchingExisting.quantity + cleanQty;
+            const combinedPricing = calculateItemPricing(product, combinedQty, scent, packaging);
             return {
               items: state.items.map((item) =>
-                item.id === matchingExisting.id
-                  ? { ...item, quantity: item.quantity + cleanQty }
-                  : item
+                item.id === matchingExisting.id ? { ...item, quantity: combinedQty } : item
               ),
               customizerProduct: null,
               editingItemId: null,
-              isDrawerOpen: true,
+              isDrawerOpen: false,
+              cartPulseKey: nextPulse,
+              toastNotification: {
+                ...nextToast,
+                quantity: combinedQty,
+                subtotal: combinedPricing.lineSubtotal,
+              },
             };
           }
 
@@ -153,7 +183,9 @@ export const useQuoteStore = create<QuoteStoreState>()(
             items: [...state.items, newItem],
             customizerProduct: null,
             editingItemId: null,
-            isDrawerOpen: true,
+            isDrawerOpen: false,
+            cartPulseKey: nextPulse,
+            toastNotification: nextToast,
           };
         });
       },

@@ -6,6 +6,7 @@ import {
   Minus,
   Package,
   Plus,
+  ShoppingBag,
   Sparkles,
   Tag,
   Wind,
@@ -69,6 +70,15 @@ export function ProductCustomizerModal() {
     setCustomLabelMessage('');
   }, [product, editingItemId, customizerInitialQty, items]);
 
+  useEffect(() => {
+    if (!product) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') closeCustomizer();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [product, closeCustomizer]);
+
   const applyQuantity = (nextQty: number) => {
     const clamped = Math.max(MIN_ORDER_PER_MODEL, Math.min(500, Math.floor(nextQty)));
     const crossedIntoFree =
@@ -79,22 +89,18 @@ export function ProductCustomizerModal() {
     setQuantity(clamped);
     setRawQtyInput(String(clamped));
     if (crossedIntoFree) {
-      // Auto-seleccionar caja con ventana gratis al superar 25 piezas si estaba en "Sin caja"
       setPackaging('caja-con-ventana');
     }
   };
 
-  if (!product) {
-    return <AnimatePresence />;
-  }
-
-  const pricing = calculateItemPricing(product, quantity, scent, packaging);
+  const pricing = product ? calculateItemPricing(product, quantity, scent, packaging) : null;
   const sliderMax = Math.max(120, quantity);
   const progressToFreePct = Math.min(100, Math.round((quantity / 26) * 100));
   const labelPresets =
-    product.collection === 'eventos' ? EVENTOS_LABEL_PRESETS : NAVIDAD_LABEL_PRESETS;
+    product?.collection === 'eventos' ? EVENTOS_LABEL_PRESETS : NAVIDAD_LABEL_PRESETS;
 
   const handleSubmit = () => {
+    if (!product || !pricing) return;
     const parsed = parseInt(rawQtyInput, 10);
     const finalQty =
       !Number.isNaN(parsed) && parsed >= MIN_ORDER_PER_MODEL
@@ -113,9 +119,10 @@ export function ProductCustomizerModal() {
 
   return (
     <AnimatePresence>
-      {product && (
+      {product && pricing && (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4"
+          key="customizer-overlay"
+          className="pointer-events-none fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4"
           role="dialog"
           aria-modal="true"
           aria-labelledby="customizer-title"
@@ -124,25 +131,25 @@ export function ProductCustomizerModal() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            exit={{ opacity: 0, transition: { duration: 0.18 } }}
             onClick={closeCustomizer}
-            className="fixed inset-0 bg-charcoal/55 backdrop-blur-sm"
+            className="pointer-events-auto fixed inset-0 bg-charcoal/55 backdrop-blur-sm"
           />
 
           {/* Bottom Sheet (Mobile) / Modal (Desktop) */}
           <motion.div
-            initial={{ opacity: 0, y: '100%' }}
+            initial={{ opacity: 0, y: 60 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: '100%' }}
+            exit={{ opacity: 0, y: 40, transition: { duration: 0.18, ease: 'easeIn' } }}
             transition={{ type: 'spring', stiffness: 320, damping: 32 }}
-            className="relative z-10 flex max-h-[92dvh] w-full max-w-4xl flex-col overflow-hidden rounded-t-3xl border border-charcoal/[0.12] bg-bone shadow-2xl sm:max-h-[90vh] sm:rounded-3xl"
+            className="pointer-events-auto relative z-10 flex max-h-[92dvh] w-full max-w-4xl flex-col overflow-hidden rounded-t-3xl border border-charcoal/[0.12] bg-bone shadow-2xl sm:max-h-[90vh] sm:rounded-3xl"
           >
             {/* Mobile Sheet Handle */}
             <div className="flex justify-center bg-cream/80 pt-2.5 pb-1 sm:hidden">
               <span className="h-1.5 w-11 rounded-full bg-charcoal/20" />
             </div>
 
-            {/* Sticky Header with Live Price (Always visible while scrolling on mobile) */}
+            {/* Sticky Header with Live Price */}
             <div className="shrink-0 flex items-center justify-between gap-3 border-b border-charcoal/[0.08] bg-cream/80 px-4 py-3 sm:px-7 sm:py-4">
               <div className="flex min-w-0 items-center gap-3">
                 <img
@@ -343,74 +350,57 @@ export function ProductCustomizerModal() {
                     </div>
 
                     {/* Live Unlock Progress Banner */}
-                    <AnimatePresence mode="wait">
-                      {!pricing.isFreePackagingUnlocked ? (
-                        <motion.div
-                          key="locked-progress"
-                          initial={{ opacity: 0, y: 6 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -6 }}
-                          transition={springTransition}
-                          className="mt-4 rounded-xl border border-gold/30 bg-gold/[0.08] p-3"
-                        >
-                          <div className="flex items-center justify-between gap-2 text-xs">
-                            <span className="font-medium text-charcoal">
-                              ¡Te faltan{' '}
-                              <strong className="font-mono text-gold">
-                                {pricing.piecesToFreePackaging} pzas
-                              </strong>{' '}
-                              para caja y etiqueta gratis!
-                            </span>
-                            <span className="shrink-0 font-mono text-[11px] text-charcoal/65">
-                              {quantity}/26
-                            </span>
-                          </div>
-                          <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-charcoal/10">
-                            <motion.div
-                              initial={false}
-                              animate={{ width: `${progressToFreePct}%` }}
-                              transition={springTransition}
-                              className="h-full rounded-full bg-gold"
-                            />
-                          </div>
-                        </motion.div>
-                      ) : (
-                        <motion.div
-                          key="unlocked"
-                          initial={{ opacity: 0, scale: 0.94, y: 6 }}
-                          animate={{ opacity: 1, scale: [0.96, 1.03, 1], y: 0 }}
-                          exit={{ opacity: 0, scale: 0.95 }}
-                          transition={springTransition}
-                          className="relative mt-4 overflow-hidden rounded-xl border border-gold/50 bg-gold/[0.14] p-3 shadow-sm"
-                        >
+                    {!pricing.isFreePackagingUnlocked ? (
+                      <div className="mt-4 rounded-xl border border-gold/30 bg-gold/[0.08] p-3">
+                        <div className="flex items-center justify-between gap-2 text-xs">
+                          <span className="font-medium text-charcoal">
+                            ¡Te faltan{' '}
+                            <strong className="font-mono text-gold">
+                              {pricing.piecesToFreePackaging} pzas
+                            </strong>{' '}
+                            para caja y etiqueta gratis!
+                          </span>
+                          <span className="shrink-0 font-mono text-[11px] text-charcoal/65">
+                            {quantity}/26
+                          </span>
+                        </div>
+                        <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-charcoal/10">
                           <motion.div
-                            aria-hidden="true"
-                            initial={{ x: '-120%' }}
-                            animate={{ x: '220%' }}
-                            transition={{ duration: 1.15, ease: 'easeOut' }}
-                            className="pointer-events-none absolute inset-y-0 w-1/2 -skew-x-12 bg-gradient-to-r from-transparent via-gold/30 to-transparent"
+                            initial={false}
+                            animate={{ width: `${progressToFreePct}%` }}
+                            transition={springTransition}
+                            className="h-full rounded-full bg-gold"
                           />
-                          <div className="relative z-10 flex items-start gap-2 text-xs text-charcoal">
-                            <Gift className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
-                            <div>
-                              <p className="font-semibold">
-                                ¡Beneficio de volumen desbloqueado (+25 piezas)!
-                              </p>
-                              <p className="mt-0.5 text-charcoal/75">
-                                Tu empaque craft seleccionado pasa a{' '}
-                                <strong className="text-gold">$0 MXN</strong> y ya puedes
-                                personalizar tu etiqueta.
-                                {pricing.piecesToTier3 > 0 && (
-                                  <span className="ml-1">
-                                    (Agrega {pricing.piecesToTier3} pzas más para precio +50).
-                                  </span>
-                                )}
-                              </p>
-                            </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <motion.div
+                        key="unlocked-banner"
+                        initial={{ opacity: 0, scale: 0.96 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={springTransition}
+                        className="relative mt-4 overflow-hidden rounded-xl border border-gold/50 bg-gold/[0.14] p-3 shadow-sm"
+                      >
+                        <div className="relative z-10 flex items-start gap-2 text-xs text-charcoal">
+                          <Gift className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
+                          <div>
+                            <p className="font-semibold">
+                              ¡Beneficio de volumen desbloqueado (+25 piezas)!
+                            </p>
+                            <p className="mt-0.5 text-charcoal/75">
+                              Tu empaque craft seleccionado pasa a{' '}
+                              <strong className="text-gold">$0 MXN</strong> y ya puedes
+                              personalizar tu etiqueta.
+                              {pricing.piecesToTier3 > 0 && (
+                                <span className="ml-1">
+                                  (Agrega {pricing.piecesToTier3} pzas más para precio +50).
+                                </span>
+                              )}
+                            </p>
                           </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                        </div>
+                      </motion.div>
+                    )}
                   </div>
                 </div>
 
@@ -473,19 +463,11 @@ export function ProductCustomizerModal() {
                         <Package className="h-4 w-4 text-sage" />
                         3. Empaque
                       </span>
-                      <AnimatePresence>
-                        {pricing.isFreePackagingUnlocked && (
-                          <motion.span
-                            initial={{ scale: 0.88, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.88, opacity: 0 }}
-                            transition={springTransition}
-                            className="rounded-full border border-gold/40 bg-gold/15 px-2.5 py-0.5 font-mono text-[10px] font-semibold text-gold"
-                          >
-                            ¡Empaque Gratis Activo!
-                          </motion.span>
-                        )}
-                      </AnimatePresence>
+                      {pricing.isFreePackagingUnlocked && (
+                        <span className="rounded-full border border-gold/40 bg-gold/15 px-2.5 py-0.5 font-mono text-[10px] font-semibold text-gold">
+                          ¡Empaque Gratis Activo!
+                        </span>
+                      )}
                     </div>
 
                     <div className="mt-3 space-y-2">
@@ -551,53 +533,43 @@ export function ProductCustomizerModal() {
                   </div>
 
                   {/* 4. Etiqueta Personalizada (Desbloqueada en >25 piezas) */}
-                  <AnimatePresence initial={false}>
-                    {pricing.isCustomLabelUnlocked && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={springTransition}
-                        className="overflow-hidden"
+                  {pricing.isCustomLabelUnlocked && (
+                    <div className="rounded-2xl border border-gold/40 bg-gold/[0.07] p-4">
+                      <label
+                        htmlFor="custom-label-input"
+                        className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-gold"
                       >
-                        <div className="rounded-2xl border border-gold/40 bg-gold/[0.07] p-4">
-                          <label
-                            htmlFor="custom-label-input"
-                            className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-gold"
+                        <Tag className="h-3.5 w-3.5" />
+                        Mensaje de etiqueta personalizada (Incluida)
+                      </label>
+                      <input
+                        id="custom-label-input"
+                        type="text"
+                        maxLength={85}
+                        value={customLabelMessage}
+                        onChange={(e) => setCustomLabelMessage(e.target.value)}
+                        placeholder="Ej. Feliz Navidad · Familia Mendoza 2026"
+                        className="mt-2.5 min-h-[44px] w-full rounded-xl border border-gold/40 bg-bone px-3.5 py-2.5 text-sm text-charcoal placeholder:text-charcoal/40 focus:border-charcoal focus:outline-none"
+                      />
+                      <div className="mt-2.5 flex flex-wrap gap-1.5">
+                        {labelPresets.map((preset) => (
+                          <button
+                            key={preset}
+                            type="button"
+                            onClick={() => setCustomLabelMessage(preset)}
+                            className="min-h-[34px] rounded-full border border-charcoal/10 bg-bone px-3 py-1 text-[11px] text-charcoal/70 transition-colors hover:border-gold hover:text-charcoal"
                           >
-                            <Tag className="h-3.5 w-3.5" />
-                            Mensaje de etiqueta personalizada (Incluida)
-                          </label>
-                          <input
-                            id="custom-label-input"
-                            type="text"
-                            maxLength={85}
-                            value={customLabelMessage}
-                            onChange={(e) => setCustomLabelMessage(e.target.value)}
-                            placeholder="Ej. Feliz Navidad · Familia Mendoza 2025"
-                            className="mt-2.5 min-h-[44px] w-full rounded-xl border border-gold/40 bg-bone px-3.5 py-2.5 text-sm text-charcoal placeholder:text-charcoal/40 focus:border-charcoal focus:outline-none"
-                          />
-                          <div className="mt-2.5 flex flex-wrap gap-1.5">
-                            {labelPresets.map((preset) => (
-                              <button
-                                key={preset}
-                                type="button"
-                                onClick={() => setCustomLabelMessage(preset)}
-                                className="min-h-[34px] rounded-full border border-charcoal/10 bg-bone px-3 py-1 text-[11px] text-charcoal/70 transition-colors hover:border-gold hover:text-charcoal"
-                              >
-                                {preset}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                            {preset}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
 
-            {/* Sticky Bottom Summary Bar */}
+            {/* Sticky Bottom Summary Bar with High-Visibility CTA */}
             <div className="shrink-0 border-t border-charcoal/[0.08] bg-cream/95 px-4 pt-3 pb-safe backdrop-blur-md sm:px-7 sm:py-4">
               <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center sm:gap-4">
                 <div className="flex items-center justify-between gap-3 sm:justify-start sm:gap-6">
@@ -619,37 +591,31 @@ export function ProductCustomizerModal() {
                     </span>
                   </div>
 
-                  <AnimatePresence>
-                    {pricing.totalItemSavings > 0 && (
-                      <motion.div
-                        initial={{ scale: 0.88, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        exit={{ scale: 0.88, opacity: 0 }}
-                        transition={springTransition}
-                        className="rounded-xl border border-gold/40 bg-gold/15 px-2.5 py-1 sm:px-3 sm:py-1.5"
-                      >
-                        <span className="block font-mono text-[9px] uppercase tracking-wider text-gold sm:text-[10px]">
-                          Ahorras
-                        </span>
-                        <span className="font-mono text-xs font-bold tabular-nums text-charcoal sm:text-sm">
-                          {formatMXN(pricing.totalItemSavings)}
-                        </span>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  {pricing.totalItemSavings > 0 && (
+                    <div className="rounded-xl border border-gold/40 bg-gold/15 px-2.5 py-1 sm:px-3 sm:py-1.5">
+                      <span className="block font-mono text-[9px] uppercase tracking-wider text-gold sm:text-[10px]">
+                        Ahorras
+                      </span>
+                      <span className="font-mono text-xs font-bold tabular-nums text-charcoal sm:text-sm">
+                        {formatMXN(pricing.totalItemSavings)}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 <motion.button
                   type="button"
                   whileHover={{ y: -1 }}
-                  whileTap={{ scale: 0.97 }}
+                  whileTap={{ scale: 0.96 }}
                   transition={springTransition}
                   onClick={handleSubmit}
-                  className="inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-full bg-charcoal px-7 py-3 text-sm font-semibold text-bone shadow-md transition-colors hover:bg-charcoal/90 sm:w-auto"
+                  className="inline-flex min-h-[50px] w-full items-center justify-center gap-2.5 rounded-full border border-gold/60 bg-charcoal px-7 py-3 text-sm font-semibold text-bone shadow-[0_12px_28px_-10px_rgba(44,42,41,0.55)] transition-colors hover:bg-charcoal/90 sm:w-auto"
                 >
-                  <Check className="h-4 w-4 text-gold" />
+                  <ShoppingBag className="h-4 w-4 text-gold" />
                   <span>
-                    {editingItemId ? 'Actualizar en Cotización' : 'Agregar a mi Cotización'}
+                    {editingItemId
+                      ? `Actualizar en Cotización · ${formatMXN(pricing.lineSubtotal)} MXN`
+                      : `Agregar a mi Cotización · ${formatMXN(pricing.lineSubtotal)} MXN`}
                   </span>
                 </motion.button>
               </div>

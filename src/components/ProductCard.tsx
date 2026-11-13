@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Check, PencilRuler, Ruler, Scale, Sparkles } from 'lucide-react';
+import { Check, Plus, Ruler, Scale, ShoppingBag, Sparkles } from 'lucide-react';
 import { useQuoteStore } from '../store/useQuoteStore';
 import { Product } from '../types/quote';
 import { formatMXN } from '../utils/pricing';
@@ -33,9 +33,9 @@ export function ProductCard({
     setSelectedTier(previewTier);
   }, [previewTier]);
 
-  const inQuoteCount = items
-    .filter((it) => it.product.id === product.id)
-    .reduce((acc, it) => acc + it.quantity, 0);
+  const matchingItems = items.filter((it) => it.product.id === product.id);
+  const inQuoteCount = matchingItems.reduce((acc, it) => acc + it.quantity, 0);
+  const firstMatchingId = matchingItems[0]?.id;
 
   const activePreviewPrice =
     selectedTier === 1
@@ -98,9 +98,9 @@ export function ProductCard({
           {/* Already in quote pill */}
           {inQuoteCount > 0 && (
             <div className="absolute bottom-3.5 left-3.5">
-              <span className="inline-flex items-center gap-1 rounded-full bg-sage px-3 py-1 text-[11px] font-semibold tabular-nums text-bone shadow-sm">
-                <Check className="h-3 w-3" />
-                En cotización: {inQuoteCount} pzas
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-bone/30 bg-sage px-3.5 py-1.5 text-[11px] font-semibold tabular-nums text-bone shadow-md">
+                <Check className="h-3.5 w-3.5 text-bone" strokeWidth={2.5} />
+                En tu cotización ({inQuoteCount} pzas)
               </span>
             </div>
           )}
@@ -179,21 +179,35 @@ export function ProductCard({
             </div>
           </div>
 
-          {/* CTA Button */}
-          <motion.button
-            type="button"
-            whileTap={{ scale: 0.97 }}
-            transition={springTransition}
-            onClick={() => openCustomizer(product, undefined, initialQty)}
-            className="mt-5 inline-flex min-h-[46px] w-full items-center justify-center gap-2 rounded-full border border-charcoal bg-charcoal px-4 py-2.5 text-xs font-semibold tracking-wide text-bone transition-colors hover:bg-charcoal/90"
-          >
-            <PencilRuler className="h-3.5 w-3.5 text-gold" />
-            <span>
-              {selectedTier > 1
-                ? `Personalizar y Cotizar (${initialQty}+ pzas)`
-                : 'Personalizar y Cotizar'}
-            </span>
-          </motion.button>
+          {/* High-Visibility CTA Button */}
+          {inQuoteCount > 0 ? (
+            <motion.button
+              type="button"
+              whileTap={{ scale: 0.96 }}
+              transition={springTransition}
+              onClick={() => openCustomizer(product, firstMatchingId)}
+              className="mt-5 inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-full border border-gold bg-gold/20 px-4 py-2.5 text-xs font-bold tracking-wide text-charcoal shadow-sm transition-colors hover:bg-gold/30"
+            >
+              <ShoppingBag className="h-4 w-4 text-charcoal" />
+              <span>Editar o sumar más · {inQuoteCount} pzas</span>
+              <Plus className="h-3.5 w-3.5 text-charcoal" />
+            </motion.button>
+          ) : (
+            <motion.button
+              type="button"
+              whileTap={{ scale: 0.96 }}
+              transition={springTransition}
+              onClick={() => openCustomizer(product, undefined, initialQty)}
+              className="mt-5 inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-full border border-gold/45 bg-charcoal px-4 py-2.5 text-xs font-semibold tracking-wide text-bone shadow-[0_10px_24px_-10px_rgba(44,42,41,0.5)] transition-colors hover:bg-charcoal/90"
+            >
+              <ShoppingBag className="h-4 w-4 text-gold" />
+              <span>
+                {selectedTier > 1
+                  ? `Personalizar y Agregar (${initialQty}+ pzas)`
+                  : 'Personalizar y Agregar'}
+              </span>
+            </motion.button>
+          )}
         </div>
       </SpotlightCard>
     </motion.div>

@@ -2,7 +2,6 @@ import { motion } from 'framer-motion';
 import { Instagram, ShoppingBag } from 'lucide-react';
 import { useQuoteStore } from '../store/useQuoteStore';
 import { calculateQuoteSummary, formatMXN } from '../utils/pricing';
-import { springTransition } from './ui/SpotlightCard';
 
 export function Navbar() {
   const items = useQuoteStore((s) => s.items);
@@ -10,6 +9,7 @@ export function Navbar() {
   const isFirstPurchase = useQuoteStore((s) => s.isFirstPurchase);
   const openDrawer = useQuoteStore((s) => s.openDrawer);
   const setActiveCollection = useQuoteStore((s) => s.setActiveCollection);
+  const cartPulseKey = useQuoteStore((s) => s.cartPulseKey);
 
   const summary = calculateQuoteSummary(items, requiresInvoice, isFirstPurchase);
 
@@ -50,7 +50,7 @@ export function Navbar() {
             </span>
             <span className="hidden h-5 w-px bg-charcoal/20 sm:block" />
             <span className="hidden text-[10px] font-semibold uppercase tracking-[0.22em] text-sage sm:block">
-              Momentos de Luz · México
+              Blanca Navidad · México
             </span>
           </a>
 
@@ -64,17 +64,17 @@ export function Navbar() {
             </a>
             <a
               href="#catalogo"
+              onClick={() => setActiveCollection('navidad')}
+              className="relative py-1 font-semibold text-charcoal transition-colors hover:text-gold"
+            >
+              Blanca Navidad
+            </a>
+            <a
+              href="#catalogo"
               onClick={() => setActiveCollection('eventos')}
               className="relative py-1 transition-colors hover:text-charcoal"
             >
               Eventos 2026
-            </a>
-            <a
-              href="#catalogo"
-              onClick={() => setActiveCollection('navidad')}
-              className="relative py-1 transition-colors hover:text-charcoal"
-            >
-              Blanca Navidad
             </a>
             <a
               href="#condiciones"
@@ -84,20 +84,23 @@ export function Navbar() {
             </a>
           </nav>
 
-          {/* Boutique Quote Drawer Trigger (Compact on Mobile) */}
+          {/* Boutique Quote Drawer Trigger (Compact on Mobile + Cart Pulse) */}
           <motion.button
+            key={cartPulseKey}
             type="button"
             onClick={openDrawer}
-            whileTap={{ scale: 0.97 }}
-            transition={springTransition}
-            className="inline-flex min-h-[42px] shrink-0 items-center gap-2 rounded-full border border-charcoal bg-charcoal px-3.5 py-2 text-xs font-medium tracking-wide text-bone shadow-sm transition-colors hover:bg-charcoal/90 sm:gap-2.5 sm:px-5 sm:py-2.5 sm:text-[13px]"
+            initial={cartPulseKey > 0 ? { scale: 1 } : false}
+            animate={cartPulseKey > 0 ? { scale: [1, 1.12, 1] } : { scale: 1 }}
+            whileTap={{ scale: 0.96 }}
+            transition={{ type: 'spring', stiffness: 420, damping: 20 }}
+            className="inline-flex min-h-[42px] shrink-0 items-center gap-2 rounded-full border border-gold/45 bg-charcoal px-3.5 py-2 text-xs font-medium tracking-wide text-bone shadow-sm transition-colors hover:bg-charcoal/90 sm:gap-2.5 sm:px-5 sm:py-2.5 sm:text-[13px]"
           >
-            <ShoppingBag className="h-4 w-4 text-gold" strokeWidth={1.6} />
+            <ShoppingBag className="h-4 w-4 text-gold" strokeWidth={1.7} />
             <span className="hidden sm:inline">Mi Cotización</span>
             {summary.totalPieces > 0 ? (
-              <span className="flex items-center gap-1.5 rounded-full bg-bone/15 px-2 py-0.5 text-[11px] font-semibold tabular-nums text-bone sm:px-2.5">
+              <span className="flex items-center gap-1.5 rounded-full bg-gold px-2.5 py-0.5 text-[11px] font-bold tabular-nums text-charcoal shadow-sm">
                 <span>{summary.totalPieces} pzas</span>
-                <span className="hidden text-gold sm:inline">·</span>
+                <span className="hidden text-charcoal/50 sm:inline">·</span>
                 <span className="hidden sm:inline">{formatMXN(summary.grandTotal)}</span>
               </span>
             ) : (

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   CalendarClock,
@@ -43,6 +43,15 @@ export function QuoteDrawer() {
 
   const [copied, setCopied] = useState(false);
 
+  useEffect(() => {
+    if (!isDrawerOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') closeDrawer();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isDrawerOpen, closeDrawer]);
+
   const summary = calculateQuoteSummary(items, requiresInvoice, isFirstPurchase);
   const whatsAppText = buildWhatsAppMessage(
     items,
@@ -66,7 +75,8 @@ export function QuoteDrawer() {
     <AnimatePresence>
       {isDrawerOpen && (
         <div
-          className="fixed inset-0 z-50 flex justify-end"
+          key="quote-drawer-overlay"
+          className="pointer-events-none fixed inset-0 z-50 flex justify-end"
           role="dialog"
           aria-modal="true"
           aria-label="Resumen de Cotización"
@@ -75,18 +85,18 @@ export function QuoteDrawer() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            exit={{ opacity: 0, transition: { duration: 0.18 } }}
             onClick={closeDrawer}
-            className="fixed inset-0 bg-charcoal/55 backdrop-blur-sm"
+            className="pointer-events-auto fixed inset-0 bg-charcoal/55 backdrop-blur-sm"
           />
 
           {/* Slide-over Drawer */}
           <motion.aside
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
-            exit={{ x: '100%' }}
+            exit={{ x: '100%', transition: { duration: 0.2, ease: 'easeInOut' } }}
             transition={{ type: 'spring', stiffness: 320, damping: 32 }}
-            className="relative z-10 flex h-full w-full max-w-lg flex-col border-l border-charcoal/[0.1] bg-bone shadow-2xl"
+            className="pointer-events-auto relative z-10 flex h-full w-full max-w-lg flex-col border-l border-charcoal/[0.1] bg-bone shadow-2xl"
           >
             {/* Header */}
             <div className="shrink-0 flex items-center justify-between border-b border-charcoal/[0.08] bg-cream/80 px-4 py-3.5 sm:px-6 sm:py-4">
@@ -131,7 +141,7 @@ export function QuoteDrawer() {
                     Aún no agregas velas a tu cotización
                   </h4>
                   <p className="mt-2 max-w-xs text-sm text-charcoal/65">
-                    Explora los 49 diseños de Eventos 2026 y Blanca Navidad y personaliza tu
+                    Explora los 49 diseños de Blanca Navidad y Eventos 2026 y personaliza tu
                     pedido desde 10 piezas por modelo.
                   </p>
                   <a
@@ -157,13 +167,8 @@ export function QuoteDrawer() {
                       const packaging = getPackagingOption(item.packaging);
 
                       return (
-                        <motion.div
-                          layout
+                        <div
                           key={item.id}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, scale: 0.96 }}
-                          transition={springTransition}
                           className="rounded-2xl border border-charcoal/[0.08] bg-cream/60 p-3.5 shadow-craft-inset sm:p-4"
                         >
                           <div className="flex gap-3">
@@ -311,7 +316,7 @@ export function QuoteDrawer() {
                               </div>
                             </div>
                           </div>
-                        </motion.div>
+                        </div>
                       );
                     })}
                   </div>
@@ -344,10 +349,8 @@ export function QuoteDrawer() {
                             : 'border-charcoal/20 bg-bone'
                         }`}
                       >
-                        <motion.span
-                          layout
-                          transition={springTransition}
-                          className={`inline-block h-5 w-5 rounded-full ${
+                        <span
+                          className={`inline-block h-5 w-5 rounded-full transition-transform duration-200 ${
                             isFirstPurchase
                               ? 'translate-x-6 bg-gold'
                               : 'translate-x-1 bg-charcoal/45'
@@ -356,53 +359,35 @@ export function QuoteDrawer() {
                       </button>
                     </div>
 
-                    <AnimatePresence mode="wait">
-                      {!summary.isFirstPurchaseEligible ? (
-                        <motion.div
-                          key="promo-progress"
-                          initial={{ opacity: 0, y: 4 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -4 }}
-                          transition={springTransition}
-                          className="mt-3 border-t border-gold/25 pt-3"
-                        >
-                          <div className="flex items-center justify-between gap-2 text-xs">
-                            <span className="font-medium text-charcoal">
-                              Te faltan{' '}
-                              <strong className="font-mono text-gold">
-                                {formatMXN(summary.amountToUnlockFirstPurchase)} MXN
-                              </strong>{' '}
-                              para activar tu 10% OFF de primera compra
-                            </span>
-                            <span className="shrink-0 font-mono text-[10px] text-charcoal/60">
-                              {summary.firstPurchaseProgressPct}%
-                            </span>
-                          </div>
-                          <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-charcoal/10">
-                            <motion.div
-                              initial={false}
-                              animate={{ width: `${summary.firstPurchaseProgressPct}%` }}
-                              transition={springTransition}
-                              className="h-full rounded-full bg-gold"
-                            />
-                          </div>
-                        </motion.div>
-                      ) : isFirstPurchase ? (
-                        <motion.div
-                          key="promo-active"
-                          initial={{ opacity: 0, scale: 0.96 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.96 }}
-                          transition={springTransition}
-                          className="mt-3 flex items-center justify-between border-t border-gold/25 pt-2.5 text-xs font-semibold text-charcoal"
-                        >
-                          <span>Descuento de bienvenida aplicado en velas:</span>
-                          <span className="font-mono text-gold">
-                            −{formatMXN(summary.firstPurchaseDiscount)} MXN
+                    {!summary.isFirstPurchaseEligible ? (
+                      <div className="mt-3 border-t border-gold/25 pt-3">
+                        <div className="flex items-center justify-between gap-2 text-xs">
+                          <span className="font-medium text-charcoal">
+                            Te faltan{' '}
+                            <strong className="font-mono text-gold">
+                              {formatMXN(summary.amountToUnlockFirstPurchase)} MXN
+                            </strong>{' '}
+                            para activar tu 10% OFF de primera compra
                           </span>
-                        </motion.div>
-                      ) : null}
-                    </AnimatePresence>
+                          <span className="shrink-0 font-mono text-[10px] text-charcoal/60">
+                            {summary.firstPurchaseProgressPct}%
+                          </span>
+                        </div>
+                        <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-charcoal/10">
+                          <div
+                            style={{ width: `${summary.firstPurchaseProgressPct}%` }}
+                            className="h-full rounded-full bg-gold transition-all duration-300"
+                          />
+                        </div>
+                      </div>
+                    ) : isFirstPurchase ? (
+                      <div className="mt-3 flex items-center justify-between border-t border-gold/25 pt-2.5 text-xs font-semibold text-charcoal">
+                        <span>Descuento de bienvenida aplicado en velas:</span>
+                        <span className="font-mono text-gold">
+                          −{formatMXN(summary.firstPurchaseDiscount)} MXN
+                        </span>
+                      </div>
+                    ) : null}
                   </div>
 
                   {/* Invoice Switch (+16% IVA) */}
@@ -431,10 +416,8 @@ export function QuoteDrawer() {
                           : 'border-charcoal/20 bg-bone'
                       }`}
                     >
-                      <motion.span
-                        layout
-                        transition={springTransition}
-                        className={`inline-block h-5 w-5 rounded-full ${
+                      <span
+                        className={`inline-block h-5 w-5 rounded-full transition-transform duration-200 ${
                           requiresInvoice
                             ? 'translate-x-6 bg-gold'
                             : 'translate-x-1 bg-charcoal/45'
@@ -496,45 +479,23 @@ export function QuoteDrawer() {
                     </div>
                   )}
 
-                  <AnimatePresence initial={false}>
-                    {summary.firstPurchaseDiscount > 0 && (
-                      <motion.div
-                        key="first-purchase-row"
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={springTransition}
-                        className="overflow-hidden"
-                      >
-                        <div className="flex justify-between py-0.5 font-semibold text-gold">
-                          <span>Descuento 1ra compra (10% en velas)</span>
-                          <span className="font-mono tabular-nums">
-                            −{formatMXN(summary.firstPurchaseDiscount)} MXN
-                          </span>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  {summary.firstPurchaseDiscount > 0 && (
+                    <div className="flex justify-between py-0.5 font-semibold text-gold">
+                      <span>Descuento 1ra compra (10% en velas)</span>
+                      <span className="font-mono tabular-nums">
+                        −{formatMXN(summary.firstPurchaseDiscount)} MXN
+                      </span>
+                    </div>
+                  )}
 
-                  <AnimatePresence initial={false}>
-                    {requiresInvoice && (
-                      <motion.div
-                        key="iva-row"
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={springTransition}
-                        className="overflow-hidden"
-                      >
-                        <div className="flex justify-between py-0.5 text-charcoal/75">
-                          <span>IVA (16%)</span>
-                          <span className="font-mono tabular-nums">
-                            +{formatMXN(summary.ivaAmount)} MXN
-                          </span>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  {requiresInvoice && (
+                    <div className="flex justify-between py-0.5 text-charcoal/75">
+                      <span>IVA (16%)</span>
+                      <span className="font-mono tabular-nums">
+                        +{formatMXN(summary.ivaAmount)} MXN
+                      </span>
+                    </div>
+                  )}
 
                   <div className="flex items-baseline justify-between border-t border-charcoal/[0.08] pt-2 text-base font-bold text-charcoal">
                     <span>Total Estimado</span>

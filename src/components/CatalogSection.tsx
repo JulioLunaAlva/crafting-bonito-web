@@ -9,14 +9,14 @@ import { springTransition } from './ui/SpotlightCard';
 
 const COLLECTION_TABS: { id: CollectionFilter; label: string; count: number }[] = [
   {
-    id: 'eventos',
-    label: 'Eventos y Recuerdos 2026',
-    count: PRODUCTS.filter((p) => p.collection === 'eventos').length,
-  },
-  {
     id: 'navidad',
     label: 'Colección Blanca Navidad',
     count: PRODUCTS.filter((p) => p.collection === 'navidad').length,
+  },
+  {
+    id: 'eventos',
+    label: 'Eventos y Recuerdos 2026',
+    count: PRODUCTS.filter((p) => p.collection === 'eventos').length,
   },
   {
     id: 'todas',
