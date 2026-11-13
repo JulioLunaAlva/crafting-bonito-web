@@ -1,6 +1,6 @@
 import { useRef } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { ArrowDownRight, Sparkles } from 'lucide-react';
+import { AnimatePresence, motion, useScroll, useTransform } from 'framer-motion';
+import { ArrowDownRight, Snowflake, Sparkles } from 'lucide-react';
 import { useQuoteStore } from '../store/useQuoteStore';
 import { springTransition } from './ui/SpotlightCard';
 
@@ -40,7 +40,9 @@ const GOLDEN_SPARKLES = [
 
 export function Hero() {
   const setIsFirstPurchase = useQuoteStore((s) => s.setIsFirstPurchase);
+  const activeCollection = useQuoteStore((s) => s.activeCollection);
   const setActiveCollection = useQuoteStore((s) => s.setActiveCollection);
+  const isNavidad = activeCollection === 'navidad';
   const sectionRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -54,7 +56,7 @@ export function Hero() {
     <section
       ref={sectionRef}
       id="inicio"
-      className="relative overflow-hidden border-b border-charcoal/[0.08] bg-cream pt-8 pb-14 sm:pt-14 sm:pb-24"
+      className="relative overflow-hidden border-b border-charcoal/[0.08] bg-cream pt-8 pb-14 transition-colors duration-700 sm:pt-14 sm:pb-24"
     >
       {/* Warm ambient candlelight aura */}
       <motion.div
@@ -68,12 +70,16 @@ export function Hero() {
           repeat: Infinity,
           ease: 'easeInOut',
         }}
-        className="pointer-events-none absolute -top-28 right-[-8%] h-[400px] w-[400px] rounded-full bg-[radial-gradient(circle,rgba(197,160,89,0.24)_0%,rgba(247,243,235,0)_70%)] blur-3xl sm:h-[520px] sm:w-[520px]"
+        className={`pointer-events-none absolute -top-28 right-[-8%] h-[400px] w-[400px] rounded-full blur-3xl transition-colors duration-700 sm:h-[520px] sm:w-[520px] ${
+          isNavidad
+            ? 'bg-[radial-gradient(circle,rgba(204,158,66,0.30)_0%,rgba(243,238,226,0)_70%)]'
+            : 'bg-[radial-gradient(circle,rgba(197,160,89,0.24)_0%,rgba(247,243,235,0)_70%)]'
+        }`}
       />
       <motion.div
         aria-hidden="true"
         animate={{
-          opacity: [0.22, 0.4, 0.22],
+          opacity: [0.22, 0.42, 0.22],
           scale: [1.02, 0.96, 1.02],
         }}
         transition={{
@@ -81,7 +87,11 @@ export function Hero() {
           repeat: Infinity,
           ease: 'easeInOut',
         }}
-        className="pointer-events-none absolute -bottom-24 left-[-10%] h-[340px] w-[340px] rounded-full bg-[radial-gradient(circle,rgba(125,138,123,0.16)_0%,rgba(247,243,235,0)_72%)] blur-3xl sm:h-[420px] sm:w-[420px]"
+        className={`pointer-events-none absolute -bottom-24 left-[-10%] h-[340px] w-[340px] rounded-full blur-3xl transition-colors duration-700 sm:h-[420px] sm:w-[420px] ${
+          isNavidad
+            ? 'bg-[radial-gradient(circle,rgba(138,34,44,0.18)_0%,rgba(21,43,33,0.10)_42%,rgba(243,238,226,0)_72%)]'
+            : 'bg-[radial-gradient(circle,rgba(125,138,123,0.16)_0%,rgba(247,243,235,0)_72%)]'
+        }`}
       />
 
       {/* Subtle Floating Golden Candlelight & Snow Sparkles (60fps GPU-only) */}
@@ -137,33 +147,39 @@ export function Hero() {
 
           <motion.div variants={heroItemVariants} className="flex items-center gap-3">
             <span className="h-px w-8 shrink-0 bg-gold" />
-            <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gold sm:text-[11px] sm:tracking-[0.22em]">
-              Colección Especial de Temporada · Hecho en México
+            <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-sage sm:text-[11px] sm:tracking-[0.22em]">
+              {isNavidad
+                ? '🎄 Edición Especial de Temporada · Hecho en México'
+                : '✨ Catálogo Anual de Eventos 2026 · Hecho en México'}
             </span>
           </motion.div>
 
-          <motion.h1
-            variants={heroItemVariants}
-            className="mt-4 font-serif text-[clamp(2.45rem,8.5vw,4.5rem)] font-semibold leading-[0.98] tracking-tight text-charcoal sm:mt-6"
-          >
-            Blanca Navidad
-            <span className="mt-1.5 block font-normal italic text-charcoal/85">
-              Hecho a mano con intención.
-            </span>
-          </motion.h1>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={isNavidad ? 'hero-copy-navidad' : 'hero-copy-eventos'}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={springTransition}
+            >
+              <h1 className="mt-4 font-serif text-[clamp(2.45rem,8.5vw,4.5rem)] font-semibold leading-[0.98] tracking-tight text-charcoal sm:mt-6">
+                {isNavidad ? 'Blanca Navidad' : 'Momentos de Luz'}
+                <span className="mt-1.5 block font-normal italic text-charcoal/85">
+                  Hecho a mano con intención.
+                </span>
+              </h1>
 
-          <motion.p
-            variants={heroItemVariants}
-            className="mt-5 max-w-xl text-[15px] leading-relaxed text-charcoal/75 sm:mt-6 sm:text-[17px]"
-          >
-            Velas escultóricas vertidas artesanalmente en{' '}
-            <strong className="font-semibold text-charcoal">
-              100% cera de soya natural
-            </strong>
-            , pensadas para iluminar posadas, bodas decembrinas y regalos corporativos
-            por volumen. Descubre también nuestra línea permanente para eventos sociales
-            todo el año.
-          </motion.p>
+              <p className="mt-5 max-w-xl text-[15px] leading-relaxed text-charcoal/75 sm:mt-6 sm:text-[17px]">
+                Velas escultóricas vertidas artesanalmente en{' '}
+                <strong className="font-semibold text-charcoal">
+                  100% cera de soya natural
+                </strong>
+                {isNavidad
+                  ? ', pensadas para iluminar posadas, bodas decembrinas y regalos corporativos por volumen. Descubre también nuestra línea permanente para eventos sociales todo el año.'
+                  : ', diseñadas para baby showers, bodas, bautizos, cumpleaños y regalos corporativos inolvidables. Cambia al modo Blanca Navidad cuando quieras ver nuestra colección festiva.'}
+              </p>
+            </motion.div>
+          </AnimatePresence>
 
           {/* Editorial CTAs */}
           <motion.div
@@ -176,10 +192,14 @@ export function Hero() {
               whileHover={{ y: -2 }}
               whileTap={{ scale: 0.97 }}
               transition={springTransition}
-              className="group inline-flex min-h-[48px] w-full items-center justify-center gap-2.5 rounded-full bg-charcoal px-7 py-3.5 text-sm font-semibold tracking-wide text-bone shadow-md transition-colors hover:bg-charcoal/90 sm:w-auto"
+              className={`group inline-flex min-h-[48px] w-full items-center justify-center gap-2.5 rounded-full px-7 py-3.5 text-sm font-semibold tracking-wide transition-colors sm:w-auto ${
+                isNavidad
+                  ? 'bg-charcoal text-bone shadow-md hover:bg-charcoal/90'
+                  : 'border border-charcoal/20 bg-bone/80 text-charcoal hover:border-gold/70 hover:bg-bone'
+              }`}
             >
-              <Sparkles className="h-4 w-4 text-gold" />
-              <span>Explorar Blanca Navidad</span>
+              <Snowflake className="h-4 w-4 text-gold" />
+              <span>🎄 Explorar Blanca Navidad</span>
               <ArrowDownRight className="h-4 w-4 text-gold transition-transform group-hover:translate-x-0.5 group-hover:translate-y-0.5" />
             </motion.a>
 
@@ -189,9 +209,14 @@ export function Hero() {
               whileHover={{ y: -2 }}
               whileTap={{ scale: 0.97 }}
               transition={springTransition}
-              className="inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-full border border-charcoal/20 bg-transparent px-6 py-3.5 text-sm font-medium text-charcoal transition-colors hover:border-gold/60 hover:bg-bone/70 sm:w-auto"
+              className={`group inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-full px-6 py-3.5 text-sm font-semibold transition-colors sm:w-auto ${
+                !isNavidad
+                  ? 'bg-charcoal text-bone shadow-md hover:bg-charcoal/90'
+                  : 'border border-charcoal/20 bg-transparent text-charcoal hover:border-gold/60 hover:bg-bone/70'
+              }`}
             >
-              <span>Catálogo de Eventos 2026</span>
+              <Sparkles className="h-4 w-4 text-gold" />
+              <span>✨ Catálogo de Eventos 2026</span>
             </motion.a>
           </motion.div>
 
@@ -258,11 +283,26 @@ export function Hero() {
               className="editorial-frame relative overflow-hidden rounded-t-[190px] rounded-b-3xl bg-bone p-2.5 will-change-transform sm:rounded-t-[230px] sm:p-3"
             >
               <div className="relative aspect-[4/5] overflow-hidden rounded-t-[180px] rounded-b-2xl bg-cream sm:rounded-t-[218px]">
-                <img
-                  src={`${import.meta.env.BASE_URL}images/brand/hero-candle.jpg`}
-                  alt="Velas artesanales de cera de soya Colección Blanca Navidad"
-                  className="h-full w-full object-cover object-center transition-transform duration-700 hover:scale-[1.03]"
-                />
+                <AnimatePresence mode="wait">
+                  <motion.img
+                    key={isNavidad ? 'arch-navidad' : 'arch-eventos'}
+                    initial={{ opacity: 0, scale: 1.03 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.98 }}
+                    transition={{ duration: 0.45 }}
+                    src={
+                      isNavidad
+                        ? `${import.meta.env.BASE_URL}images/brand/hero-candle.jpg`
+                        : `${import.meta.env.BASE_URL}images/events/hero-unicornios.jpg`
+                    }
+                    alt={
+                      isNavidad
+                        ? 'Velas artesanales de cera de soya Colección Blanca Navidad'
+                        : 'Velas artesanales de cera de soya Catálogo Eventos 2026'
+                    }
+                    className="h-full w-full object-cover object-center transition-transform duration-700 hover:scale-[1.03]"
+                  />
+                </AnimatePresence>
               </div>
             </motion.div>
 
@@ -275,18 +315,35 @@ export function Hero() {
               className="mt-4 flex items-center gap-3.5 rounded-2xl border border-gold/30 bg-bone p-2.5 shadow-craft-card will-change-transform sm:absolute sm:-bottom-6 sm:-left-10 sm:mt-0 sm:w-52 sm:flex-col sm:items-stretch sm:gap-2"
             >
               <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl sm:h-32 sm:w-full">
-                <img
-                  src={`${import.meta.env.BASE_URL}images/brand/velas-solas-cover.jpg`}
-                  alt="Velas escultóricas pintadas a mano en dorado"
-                  className="h-full w-full object-cover object-center"
-                />
+                <AnimatePresence mode="wait">
+                  <motion.img
+                    key={isNavidad ? 'sec-navidad' : 'sec-eventos'}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.35 }}
+                    src={
+                      isNavidad
+                        ? `${import.meta.env.BASE_URL}images/brand/velas-solas-cover.jpg`
+                        : `${import.meta.env.BASE_URL}images/events/ositos-vaso.jpg`
+                    }
+                    alt={
+                      isNavidad
+                        ? 'Velas escultóricas pintadas a mano en dorado'
+                        : 'Velas en vaso personalizadas para recuerdos de eventos'
+                    }
+                    className="h-full w-full object-cover object-center"
+                  />
+                </AnimatePresence>
               </div>
               <div className="px-1 pb-0.5">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-gold">
-                  Edición Navidad · Autor
+                  {isNavidad ? 'Edición Navidad · Autor' : 'Recuerdos con Encanto'}
                 </p>
                 <p className="mt-0.5 font-serif text-base font-semibold leading-tight text-charcoal">
-                  Acentos pintados a mano en dorado
+                  {isNavidad
+                    ? 'Acentos pintados a mano en dorado'
+                    : 'Personalizados para tu celebración'}
                 </p>
               </div>
             </motion.div>

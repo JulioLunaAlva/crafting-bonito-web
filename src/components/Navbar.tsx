@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Instagram, ShoppingBag } from 'lucide-react';
+import { Instagram, ShoppingBag, Snowflake, Sparkles } from 'lucide-react';
 import { useQuoteStore } from '../store/useQuoteStore';
 import { calculateQuoteSummary, formatMXN } from '../utils/pricing';
 
@@ -8,22 +8,43 @@ export function Navbar() {
   const requiresInvoice = useQuoteStore((s) => s.requiresInvoice);
   const isFirstPurchase = useQuoteStore((s) => s.isFirstPurchase);
   const openDrawer = useQuoteStore((s) => s.openDrawer);
+  const activeCollection = useQuoteStore((s) => s.activeCollection);
   const setActiveCollection = useQuoteStore((s) => s.setActiveCollection);
   const cartPulseKey = useQuoteStore((s) => s.cartPulseKey);
 
+  const isNavidad = activeCollection === 'navidad';
   const summary = calculateQuoteSummary(items, requiresInvoice, isFirstPurchase);
 
   return (
     <div className="sticky top-0 z-40">
       {/* Editorial Announcement Ribbon */}
-      <div className="bg-charcoal px-3 py-2 text-center text-[10px] font-medium tracking-[0.1em] text-cream/95 sm:px-4 sm:text-[11px] sm:uppercase sm:tracking-[0.16em]">
+      <div className="bg-charcoal px-3 py-2 text-center text-[10px] font-medium tracking-[0.1em] text-cream/95 transition-colors duration-700 sm:px-4 sm:text-[11px] sm:uppercase sm:tracking-[0.16em]">
         <span className="text-gold">
-          ✨ 10% OFF en tu 1ra compra en pedidos desde $1,500 MXN
+          {isNavidad
+            ? '🎄 Edición Blanca Navidad Activa · 10% OFF en tu 1ra compra desde $1,500 MXN'
+            : '✨ 10% OFF en tu 1ra compra en pedidos desde $1,500 MXN'}
         </span>
         <span className="mx-2 hidden text-cream/40 md:inline">·</span>
         <span className="hidden md:inline">
           Caja y etiqueta gratis (+25 pzas)
         </span>
+        <button
+          type="button"
+          onClick={() => setActiveCollection(isNavidad ? 'eventos' : 'navidad')}
+          className="ml-2.5 inline-flex items-center gap-1 rounded-full border border-gold/40 bg-bone/10 px-2.5 py-0.5 text-[10px] font-semibold normal-case tracking-normal text-gold transition-colors hover:bg-gold hover:text-charcoal md:ml-3"
+        >
+          {isNavidad ? (
+            <>
+              <Sparkles className="h-3 w-3" />
+              <span>Cambiar a Eventos 2026</span>
+            </>
+          ) : (
+            <>
+              <Snowflake className="h-3 w-3" />
+              <span>Activar Modo Navidad</span>
+            </>
+          )}
+        </button>
         <a
           href="https://www.instagram.com/craftingbonitomx"
           target="_blank"
@@ -36,7 +57,7 @@ export function Navbar() {
       </div>
 
       {/* Main Maison Header */}
-      <header className="border-b border-charcoal/[0.1] bg-cream/90 backdrop-blur-md">
+      <header className="border-b border-charcoal/[0.1] bg-cream/90 backdrop-blur-md transition-colors duration-700">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-3.5 lg:px-8">
           {/* Editorial Brand Lockup */}
           <a href="#inicio" className="group flex min-w-0 items-center gap-2.5 sm:gap-3">
@@ -50,7 +71,7 @@ export function Navbar() {
             </span>
             <span className="hidden h-5 w-px bg-charcoal/20 sm:block" />
             <span className="hidden text-[10px] font-semibold uppercase tracking-[0.22em] text-sage sm:block">
-              Blanca Navidad · México
+              {isNavidad ? '🎄 Blanca Navidad · México' : 'Momentos de Luz · México'}
             </span>
           </a>
 
@@ -65,14 +86,23 @@ export function Navbar() {
             <a
               href="#catalogo"
               onClick={() => setActiveCollection('navidad')}
-              className="relative py-1 font-semibold text-charcoal transition-colors hover:text-gold"
+              className={`relative inline-flex items-center gap-1.5 py-1 transition-colors ${
+                isNavidad
+                  ? 'font-semibold text-sage underline decoration-gold decoration-2 underline-offset-4'
+                  : 'hover:text-charcoal'
+              }`}
             >
-              Blanca Navidad
+              <Snowflake className={`h-3.5 w-3.5 ${isNavidad ? 'text-gold' : 'text-charcoal/50'}`} />
+              <span>Blanca Navidad</span>
             </a>
             <a
               href="#catalogo"
               onClick={() => setActiveCollection('eventos')}
-              className="relative py-1 transition-colors hover:text-charcoal"
+              className={`relative py-1 transition-colors ${
+                activeCollection === 'eventos'
+                  ? 'font-semibold text-charcoal underline decoration-gold decoration-2 underline-offset-4'
+                  : 'hover:text-charcoal'
+              }`}
             >
               Eventos 2026
             </a>

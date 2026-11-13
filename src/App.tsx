@@ -4,6 +4,7 @@ import { ArrowRight, CheckCircle2, ShoppingBag, Sparkles, X } from 'lucide-react
 import { CatalogSection } from './components/CatalogSection';
 import { Footer } from './components/Footer';
 import { Hero } from './components/Hero';
+import { HolidaySnowOverlay } from './components/HolidaySnowOverlay';
 import { Navbar } from './components/Navbar';
 import { ProductCustomizerModal } from './components/ProductCustomizerModal';
 import { QuoteDrawer } from './components/QuoteDrawer';
@@ -19,13 +20,22 @@ export default function App() {
   const openDrawer = useQuoteStore((s) => s.openDrawer);
   const isDrawerOpen = useQuoteStore((s) => s.isDrawerOpen);
   const customizerProduct = useQuoteStore((s) => s.customizerProduct);
+  const activeCollection = useQuoteStore((s) => s.activeCollection);
   const cartPulseKey = useQuoteStore((s) => s.cartPulseKey);
   const toastNotification = useQuoteStore((s) => s.toastNotification);
   const dismissToast = useQuoteStore((s) => s.dismissToast);
 
+  const isNavidadTheme = activeCollection === 'navidad';
   const summary = calculateQuoteSummary(items, requiresInvoice, isFirstPurchase);
   const isOverlayOpen = isDrawerOpen || Boolean(customizerProduct);
   const showMobileBar = !isOverlayOpen;
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('theme-navidad', isNavidadTheme);
+    return () => {
+      document.documentElement.classList.remove('theme-navidad');
+    };
+  }, [isNavidadTheme]);
 
   // Garantiza limpieza absoluta de overflow/touchAction al cerrar cualquier overlay
   useEffect(() => {
@@ -51,7 +61,12 @@ export default function App() {
   }, [toastNotification, dismissToast]);
 
   return (
-    <div className="craft-grain relative min-h-screen overflow-x-hidden bg-cream pb-24 text-charcoal md:pb-0">
+    <div
+      className={`craft-grain relative min-h-screen overflow-x-hidden bg-cream pb-24 text-charcoal transition-colors duration-700 md:pb-0 ${
+        isNavidadTheme ? 'theme-navidad' : ''
+      }`}
+    >
+      <HolidaySnowOverlay isActive={isNavidadTheme} />
       <Navbar />
 
       <main>

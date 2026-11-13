@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Search, Sparkles } from 'lucide-react';
+import { Search, Snowflake, Sparkles } from 'lucide-react';
 import { PRODUCTS } from '../data/products';
 import { useQuoteStore } from '../store/useQuoteStore';
 import { CatalogFilter, CollectionFilter } from '../types/quote';
@@ -244,8 +244,13 @@ export function CatalogSection() {
                   />
                 )}
                 <span className="relative z-10 flex items-center gap-2 whitespace-nowrap">
-                  {col.id === 'navidad' && <Sparkles className="h-3.5 w-3.5 text-gold" />}
+                  {col.id === 'navidad' && <Snowflake className="h-3.5 w-3.5 text-gold" />}
                   <span>{col.label}</span>
+                  {col.id === 'navidad' && isSelected && (
+                    <span className="hidden rounded-full border border-gold/40 bg-berry px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-bone sm:inline-flex">
+                      Tema Navideño Activo
+                    </span>
+                  )}
                   <span
                     className={`rounded-full px-2 py-0.5 text-[11px] font-semibold tabular-nums ${
                       isSelected
@@ -260,6 +265,35 @@ export function CatalogSection() {
             );
           })}
         </div>
+
+        <AnimatePresence>
+          {activeCollection === 'navidad' && (
+            <motion.div
+              key="navidad-banner"
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={springTransition}
+              className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-gold/45 bg-gradient-to-r from-pine via-pine to-berry/90 px-4 py-3 text-xs text-bone shadow-sm"
+            >
+              <div className="flex items-center gap-2.5">
+                <Snowflake className="h-4 w-4 shrink-0 text-gold" />
+                <span>
+                  <strong className="text-gold">🎄 Atmósfera Blanca Navidad activa:</strong>{' '}
+                  paleta verde pino, carmesí festivo, acentos dorados y nevada en toda la
+                  página.
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleCollectionChange('eventos')}
+                className="shrink-0 rounded-full border border-gold/45 bg-bone/10 px-3 py-1 text-[11px] font-semibold text-gold transition-colors hover:bg-gold hover:text-charcoal"
+              >
+                Ver Eventos 2026
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Sub-Filter Bar + Search */}
         <div className="mt-4 flex flex-col justify-between gap-4 rounded-2xl border border-charcoal/[0.08] bg-bone/90 p-3 shadow-craft-inset md:flex-row md:items-center">

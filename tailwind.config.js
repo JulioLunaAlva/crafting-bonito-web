@@ -4,11 +4,13 @@ export default {
   theme: {
     extend: {
       colors: {
-        cream: '#F7F3EB',
-        bone: '#FCFBF7',
-        charcoal: '#2C2A29',
-        sage: '#7D8A7B',
-        gold: '#C5A059',
+        cream: 'rgb(var(--c-cream) / <alpha-value>)',
+        bone: 'rgb(var(--c-bone) / <alpha-value>)',
+        charcoal: 'rgb(var(--c-charcoal) / <alpha-value>)',
+        sage: 'rgb(var(--c-sage) / <alpha-value>)',
+        gold: 'rgb(var(--c-gold) / <alpha-value>)',
+        pine: '#162C22',
+        berry: '#8A242C',
       },
       fontFamily: {
         serif: ['"Cormorant Garamond"', '"Playfair Display"', 'Georgia', 'serif'],
