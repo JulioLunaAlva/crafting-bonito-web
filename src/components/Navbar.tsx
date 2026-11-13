@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Instagram, ShoppingBag, Snowflake, Sparkles } from 'lucide-react';
+import { Instagram, ShoppingBag, Snowflake } from 'lucide-react';
 import { useQuoteStore } from '../store/useQuoteStore';
 import { calculateQuoteSummary, formatMXN } from '../utils/pricing';
 
@@ -20,31 +20,12 @@ export function Navbar() {
       {/* Editorial Announcement Ribbon */}
       <div className="bg-charcoal px-3 py-2 text-center text-[10px] font-medium tracking-[0.1em] text-cream/95 transition-colors duration-700 sm:px-4 sm:text-[11px] sm:uppercase sm:tracking-[0.16em]">
         <span className="text-gold">
-          {isNavidad
-            ? '🎄 Edición Blanca Navidad Activa · 10% OFF en tu 1ra compra desde $1,500 MXN'
-            : '✨ 10% OFF en tu 1ra compra en pedidos desde $1,500 MXN'}
+          ✨ 10% OFF en tu 1ra compra en pedidos desde $1,500 MXN
         </span>
         <span className="mx-2 hidden text-cream/40 md:inline">·</span>
         <span className="hidden md:inline">
           Caja y etiqueta gratis (+25 pzas)
         </span>
-        <button
-          type="button"
-          onClick={() => setActiveCollection(isNavidad ? 'eventos' : 'navidad')}
-          className="ml-2.5 inline-flex items-center gap-1 rounded-full border border-gold/40 bg-bone/10 px-2.5 py-0.5 text-[10px] font-semibold normal-case tracking-normal text-gold transition-colors hover:bg-gold hover:text-charcoal md:ml-3"
-        >
-          {isNavidad ? (
-            <>
-              <Sparkles className="h-3 w-3" />
-              <span>Cambiar a Eventos 2026</span>
-            </>
-          ) : (
-            <>
-              <Snowflake className="h-3 w-3" />
-              <span>Activar Modo Navidad</span>
-            </>
-          )}
-        </button>
         <a
           href="https://www.instagram.com/craftingbonitomx"
           target="_blank"
@@ -71,7 +52,7 @@ export function Navbar() {
             </span>
             <span className="hidden h-5 w-px bg-charcoal/20 sm:block" />
             <span className="hidden text-[10px] font-semibold uppercase tracking-[0.22em] text-sage sm:block">
-              {isNavidad ? '🎄 Blanca Navidad · México' : 'Momentos de Luz · México'}
+              {isNavidad ? 'Blanca Navidad · México' : 'Momentos de Luz · México'}
             </span>
           </a>
 

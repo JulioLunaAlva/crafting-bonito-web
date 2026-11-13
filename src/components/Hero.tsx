@@ -149,8 +149,8 @@ export function Hero() {
             <span className="h-px w-8 shrink-0 bg-gold" />
             <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-sage sm:text-[11px] sm:tracking-[0.22em]">
               {isNavidad
-                ? '🎄 Edición Especial de Temporada · Hecho en México'
-                : '✨ Catálogo Anual de Eventos 2026 · Hecho en México'}
+                ? 'Colección Especial de Temporada · Hecho en México'
+                : 'Catálogo Anual de Eventos 2026 · Hecho en México'}
             </span>
           </motion.div>
 
@@ -176,7 +176,7 @@ export function Hero() {
                 </strong>
                 {isNavidad
                   ? ', pensadas para iluminar posadas, bodas decembrinas y regalos corporativos por volumen. Descubre también nuestra línea permanente para eventos sociales todo el año.'
-                  : ', diseñadas para baby showers, bodas, bautizos, cumpleaños y regalos corporativos inolvidables. Cambia al modo Blanca Navidad cuando quieras ver nuestra colección festiva.'}
+                  : ', diseñadas para baby showers, bodas, bautizos, cumpleaños y regalos corporativos inolvidables hechos a la medida de tu celebración.'}
               </p>
             </motion.div>
           </AnimatePresence>
@@ -199,7 +199,7 @@ export function Hero() {
               }`}
             >
               <Snowflake className="h-4 w-4 text-gold" />
-              <span>🎄 Explorar Blanca Navidad</span>
+              <span>Explorar Blanca Navidad</span>
               <ArrowDownRight className="h-4 w-4 text-gold transition-transform group-hover:translate-x-0.5 group-hover:translate-y-0.5" />
             </motion.a>
 
@@ -216,7 +216,7 @@ export function Hero() {
               }`}
             >
               <Sparkles className="h-4 w-4 text-gold" />
-              <span>✨ Catálogo de Eventos 2026</span>
+              <span>Catálogo de Eventos 2026</span>
             </motion.a>
           </motion.div>
 
