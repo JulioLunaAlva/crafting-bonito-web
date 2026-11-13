@@ -128,16 +128,16 @@ export function QuoteDrawer() {
                     Aún no agregas velas a tu cotización
                   </h4>
                   <p className="mt-2 max-w-xs text-sm text-charcoal/65">
-                    Explora los 27 diseños de Blanca Navidad y personaliza tu pedido desde 10
-                    piezas por modelo.
+                    Explora los 49 diseños de Eventos 2026 y Blanca Navidad y personaliza tu
+                    pedido desde 10 piezas por modelo.
                   </p>
-                  <button
-                    type="button"
+                  <a
+                    href="#catalogo"
                     onClick={closeDrawer}
-                    className="mt-6 min-h-[46px] rounded-full bg-charcoal px-6 py-2.5 text-xs font-semibold text-bone"
+                    className="mt-6 inline-flex min-h-[46px] items-center justify-center rounded-full bg-charcoal px-6 py-2.5 text-xs font-semibold text-bone"
                   >
                     Ir al Catálogo
-                  </button>
+                  </a>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -236,30 +236,63 @@ export function QuoteDrawer() {
                               </div>
 
                               {/* Quantity & Subtotal */}
-                              <div className="mt-3 flex items-center justify-between border-t border-charcoal/[0.07] pt-2.5">
-                                <div className="inline-flex items-center rounded-xl border border-charcoal/15 bg-bone">
-                                  <motion.button
-                                    type="button"
-                                    whileTap={{ scale: 0.92 }}
-                                    onClick={() => updateItemQuantity(item.id, item.quantity - 1)}
-                                    disabled={item.quantity <= 10}
-                                    className="flex h-9 w-9 items-center justify-center text-charcoal/70 hover:text-charcoal disabled:opacity-35"
-                                    aria-label="Disminuir cantidad"
-                                  >
-                                    <Minus className="h-3.5 w-3.5" />
-                                  </motion.button>
-                                  <span className="px-2 font-mono text-xs font-semibold tabular-nums text-charcoal">
-                                    {item.quantity} pzas
-                                  </span>
-                                  <motion.button
-                                    type="button"
-                                    whileTap={{ scale: 0.92 }}
-                                    onClick={() => updateItemQuantity(item.id, item.quantity + 1)}
-                                    className="flex h-9 w-9 items-center justify-center text-charcoal/70 hover:text-charcoal"
-                                    aria-label="Aumentar cantidad"
-                                  >
-                                    <Plus className="h-3.5 w-3.5" />
-                                  </motion.button>
+                              <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-charcoal/[0.07] pt-2.5">
+                                <div className="flex flex-wrap items-center gap-1.5">
+                                  <div className="inline-flex items-center rounded-xl border border-charcoal/15 bg-bone">
+                                    <motion.button
+                                      type="button"
+                                      whileTap={{ scale: 0.92 }}
+                                      onClick={() => updateItemQuantity(item.id, item.quantity - 1)}
+                                      disabled={item.quantity <= 10}
+                                      className="flex h-9 w-9 items-center justify-center text-charcoal/70 hover:text-charcoal disabled:opacity-35"
+                                      aria-label="Disminuir cantidad"
+                                    >
+                                      <Minus className="h-3.5 w-3.5" />
+                                    </motion.button>
+                                    <input
+                                      type="number"
+                                      inputMode="numeric"
+                                      min={10}
+                                      max={500}
+                                      value={item.quantity}
+                                      onChange={(e) => {
+                                        const val = parseInt(e.target.value, 10);
+                                        if (!Number.isNaN(val) && val >= 10) {
+                                          updateItemQuantity(item.id, Math.min(500, val));
+                                        }
+                                      }}
+                                      aria-label={`Cantidad de ${item.product.name}`}
+                                      className="w-12 bg-transparent text-center font-mono text-xs font-semibold tabular-nums text-charcoal focus:outline-none"
+                                    />
+                                    <motion.button
+                                      type="button"
+                                      whileTap={{ scale: 0.92 }}
+                                      onClick={() => updateItemQuantity(item.id, item.quantity + 1)}
+                                      className="flex h-9 w-9 items-center justify-center text-charcoal/70 hover:text-charcoal"
+                                      aria-label="Aumentar cantidad"
+                                    >
+                                      <Plus className="h-3.5 w-3.5" />
+                                    </motion.button>
+                                  </div>
+
+                                  <div className="flex items-center gap-1">
+                                    {[10, 26, 51].map((q) => (
+                                      <button
+                                        key={q}
+                                        type="button"
+                                        onClick={() => updateItemQuantity(item.id, q)}
+                                        className={`rounded-lg border px-1.5 py-1 font-mono text-[10px] font-semibold transition-colors ${
+                                          (q === 10 && item.quantity <= 25) ||
+                                          (q === 26 && item.quantity >= 26 && item.quantity <= 50) ||
+                                          (q === 51 && item.quantity > 50)
+                                            ? 'border-gold bg-gold/20 text-charcoal'
+                                            : 'border-charcoal/10 bg-bone text-charcoal/60 hover:border-charcoal/25'
+                                        }`}
+                                      >
+                                        {q === 51 ? '51+' : q}
+                                      </button>
+                                    ))}
+                                  </div>
                                 </div>
 
                                 <div className="text-right">

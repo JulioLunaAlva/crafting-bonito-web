@@ -55,7 +55,7 @@ export function Footer() {
               Términos y Condiciones
             </span>
             <h2 className="mt-2 font-serif text-3xl font-semibold text-charcoal sm:text-4xl">
-              Hagamos tu Navidad aún más especial
+              Hagamos tu celebración aún más especial
             </h2>
           </div>
 
@@ -106,7 +106,7 @@ export function Footer() {
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-charcoal/[0.08] pt-6 text-xs text-charcoal/55 sm:flex-row">
           <div className="text-center sm:text-left">
             <p className="font-serif text-base text-charcoal/80">
-              Crafting Bonito · Colección Blanca Navidad
+              Crafting Bonito · Momentos de Luz &amp; Blanca Navidad
             </p>
             <p className="mt-0.5 font-serif text-sm italic text-gold">
               ¡Hacemos puras cosas bonitas!

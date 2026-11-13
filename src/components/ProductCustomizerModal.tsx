@@ -23,15 +23,21 @@ import { calculateItemPricing, formatMXN } from '../utils/pricing';
 import { springTransition } from './ui/SpotlightCard';
 
 const QUICK_QUANTITIES = [10, 26, 51, 100];
-const LABEL_PRESETS = [
+const NAVIDAD_LABEL_PRESETS = [
   'Feliz Navidad · Familia García',
-  'Posada Anual 2025 · Gracias por tu entrega',
+  'Posada Anual 2026 · Gracias por tu entrega',
+  'Boda de Invierno · Camila & Diego',
+];
+const EVENTOS_LABEL_PRESETS = [
+  '¡Gracias por acompañarnos! · Baby Shower',
   'Nuestra Boda · Camila & Diego',
+  'Mi Bautizo · Recuerdo con amor',
 ];
 
 export function ProductCustomizerModal() {
   const product = useQuoteStore((s) => s.customizerProduct);
   const editingItemId = useQuoteStore((s) => s.editingItemId);
+  const customizerInitialQty = useQuoteStore((s) => s.customizerInitialQty);
   const items = useQuoteStore((s) => s.items);
   const closeCustomizer = useQuoteStore((s) => s.closeCustomizer);
   const addOrUpdateItem = useQuoteStore((s) => s.addOrUpdateItem);
@@ -55,12 +61,13 @@ export function ProductCustomizerModal() {
         return;
       }
     }
-    setQuantity(MIN_ORDER_PER_MODEL);
-    setRawQtyInput(String(MIN_ORDER_PER_MODEL));
+    const startQty = Math.max(MIN_ORDER_PER_MODEL, customizerInitialQty || MIN_ORDER_PER_MODEL);
+    setQuantity(startQty);
+    setRawQtyInput(String(startQty));
     setScent('vainilla');
-    setPackaging('sin-caja');
+    setPackaging(startQty > FREE_PACKAGING_THRESHOLD ? 'caja-con-ventana' : 'sin-caja');
     setCustomLabelMessage('');
-  }, [product, editingItemId, items]);
+  }, [product, editingItemId, customizerInitialQty, items]);
 
   const applyQuantity = (nextQty: number) => {
     const clamped = Math.max(MIN_ORDER_PER_MODEL, Math.min(500, Math.floor(nextQty)));
@@ -84,11 +91,19 @@ export function ProductCustomizerModal() {
   const pricing = calculateItemPricing(product, quantity, scent, packaging);
   const sliderMax = Math.max(120, quantity);
   const progressToFreePct = Math.min(100, Math.round((quantity / 26) * 100));
+  const labelPresets =
+    product.collection === 'eventos' ? EVENTOS_LABEL_PRESETS : NAVIDAD_LABEL_PRESETS;
 
   const handleSubmit = () => {
+    const parsed = parseInt(rawQtyInput, 10);
+    const finalQty =
+      !Number.isNaN(parsed) && parsed >= MIN_ORDER_PER_MODEL
+        ? Math.min(500, Math.floor(parsed))
+        : pricing.quantity;
+
     addOrUpdateItem({
       product,
-      quantity: pricing.quantity,
+      quantity: finalQty,
       scent,
       packaging,
       customLabelMessage,
@@ -295,21 +310,25 @@ export function ProductCustomizerModal() {
                       ))}
                     </div>
 
-                    {/* Volume Tier Indicator */}
+                    {/* Interactive Volume Tier Indicator */}
                     <div className="mt-4 grid grid-cols-3 gap-2">
                       {[
-                        { tier: 1 as const, label: '10–25', price: product.prices.tier1 },
-                        { tier: 2 as const, label: '26–50', price: product.prices.tier2 },
-                        { tier: 3 as const, label: '+50', price: product.prices.tier3 },
+                        { tier: 1 as const, label: '10–25', minQty: 10, price: product.prices.tier1 },
+                        { tier: 2 as const, label: '26–50', minQty: 26, price: product.prices.tier2 },
+                        { tier: 3 as const, label: '+50', minQty: 51, price: product.prices.tier3 },
                       ].map((t) => {
                         const active = pricing.activeTier === t.tier;
                         return (
-                          <div
+                          <motion.button
                             key={t.tier}
-                            className={`rounded-xl border p-2 text-center transition-all ${
+                            type="button"
+                            whileTap={{ scale: 0.96 }}
+                            onClick={() => applyQuantity(t.minQty)}
+                            aria-pressed={active}
+                            className={`cursor-pointer rounded-xl border p-2.5 text-center transition-all ${
                               active
                                 ? 'border-gold bg-gold/15 shadow-sm'
-                                : 'border-charcoal/[0.08] bg-bone opacity-65'
+                                : 'border-charcoal/[0.08] bg-bone opacity-75 hover:border-gold/50 hover:opacity-100'
                             }`}
                           >
                             <span className="block font-mono text-[10px] text-charcoal/70">
@@ -318,7 +337,7 @@ export function ProductCustomizerModal() {
                             <span className="mt-0.5 block font-mono text-xs font-bold tabular-nums text-charcoal">
                               {formatMXN(t.price)}
                             </span>
-                          </div>
+                          </motion.button>
                         );
                       })}
                     </div>
@@ -559,7 +578,7 @@ export function ProductCustomizerModal() {
                             className="mt-2.5 min-h-[44px] w-full rounded-xl border border-gold/40 bg-bone px-3.5 py-2.5 text-sm text-charcoal placeholder:text-charcoal/40 focus:border-charcoal focus:outline-none"
                           />
                           <div className="mt-2.5 flex flex-wrap gap-1.5">
-                            {LABEL_PRESETS.map((preset) => (
+                            {labelPresets.map((preset) => (
                               <button
                                 key={preset}
                                 type="button"

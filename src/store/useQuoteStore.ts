@@ -18,9 +18,10 @@ interface QuoteStoreState {
   isDrawerOpen: boolean;
   customizerProduct: Product | null;
   editingItemId: string | null;
+  customizerInitialQty: number;
   activeCollection: CollectionFilter;
 
-  openCustomizer: (product: Product, existingItemId?: string) => void;
+  openCustomizer: (product: Product, existingItemId?: string, initialQty?: number) => void;
   closeCustomizer: () => void;
   openDrawer: () => void;
   closeDrawer: () => void;
@@ -57,12 +58,17 @@ export const useQuoteStore = create<QuoteStoreState>()(
       isDrawerOpen: false,
       customizerProduct: null,
       editingItemId: null,
+      customizerInitialQty: MIN_ORDER_PER_MODEL,
       activeCollection: 'eventos',
 
-      openCustomizer: (product, existingItemId) => {
+      openCustomizer: (product, existingItemId, initialQty) => {
         set({
           customizerProduct: product,
           editingItemId: existingItemId ?? null,
+          customizerInitialQty: Math.max(
+            MIN_ORDER_PER_MODEL,
+            Math.floor(initialQty ?? MIN_ORDER_PER_MODEL)
+          ),
         });
       },
 
@@ -70,6 +76,7 @@ export const useQuoteStore = create<QuoteStoreState>()(
         set({
           customizerProduct: null,
           editingItemId: null,
+          customizerInitialQty: MIN_ORDER_PER_MODEL,
         });
       },
 

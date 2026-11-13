@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Check, PencilRuler, Ruler, Scale, Sparkles } from 'lucide-react';
 import { useQuoteStore } from '../store/useQuoteStore';
@@ -12,6 +13,12 @@ interface ProductCardProps {
   showCollectionTag?: boolean;
 }
 
+const TIER_MIN_QTY: Record<1 | 2 | 3, number> = {
+  1: 10,
+  2: 26,
+  3: 51,
+};
+
 export function ProductCard({
   product,
   previewTier,
@@ -20,17 +27,24 @@ export function ProductCard({
 }: ProductCardProps) {
   const openCustomizer = useQuoteStore((s) => s.openCustomizer);
   const items = useQuoteStore((s) => s.items);
+  const [selectedTier, setSelectedTier] = useState<1 | 2 | 3>(previewTier);
+
+  useEffect(() => {
+    setSelectedTier(previewTier);
+  }, [previewTier]);
 
   const inQuoteCount = items
     .filter((it) => it.product.id === product.id)
     .reduce((acc, it) => acc + it.quantity, 0);
 
   const activePreviewPrice =
-    previewTier === 1
+    selectedTier === 1
       ? product.prices.tier1
-      : previewTier === 2
+      : selectedTier === 2
       ? product.prices.tier2
       : product.prices.tier3;
+
+  const initialQty = TIER_MIN_QTY[selectedTier];
 
   return (
     <motion.div
@@ -104,7 +118,7 @@ export function ProductCard({
                   {formatMXN(activePreviewPrice)}
                 </span>
                 <span className="mt-1 block text-[10px] font-medium uppercase tracking-wider text-charcoal/55">
-                  c/u · {previewTier === 1 ? '10–25' : previewTier === 2 ? '26–50' : '+50'}
+                  c/u · {selectedTier === 1 ? '10–25 pzas' : selectedTier === 2 ? '26–50 pzas' : '+50 pzas'}
                 </span>
               </div>
             </div>
@@ -125,28 +139,41 @@ export function ProductCard({
               </span>
             </div>
 
-            {/* Volume Tier Pricing Strip */}
-            <div className="mt-4 grid grid-cols-3 divide-x divide-charcoal/10 overflow-hidden rounded-xl border border-charcoal/10 bg-cream/55">
+            {/* Interactive Volume Tier Selector */}
+            <div
+              className="mt-4 grid grid-cols-3 divide-x divide-charcoal/10 overflow-hidden rounded-xl border border-charcoal/10 bg-cream/55"
+              role="group"
+              aria-label={`Seleccionar rango de piezas para ${product.name}`}
+            >
               {[
                 { tier: 1 as const, label: '10–25 pzas', price: product.prices.tier1 },
                 { tier: 2 as const, label: '26–50 pzas', price: product.prices.tier2 },
                 { tier: 3 as const, label: '+50 pzas', price: product.prices.tier3 },
               ].map((t) => {
-                const isSelected = previewTier === t.tier;
+                const isSelected = selectedTier === t.tier;
                 return (
-                  <div
+                  <button
                     key={t.tier}
-                    className={`px-2 py-2 text-center transition-colors ${
-                      isSelected ? 'bg-gold/15' : ''
+                    type="button"
+                    onClick={() => setSelectedTier(t.tier)}
+                    aria-pressed={isSelected}
+                    className={`min-h-[46px] cursor-pointer px-2 py-2 text-center transition-colors focus:outline-none ${
+                      isSelected
+                        ? 'bg-gold/20 ring-1 ring-inset ring-gold/55'
+                        : 'hover:bg-gold/10'
                     }`}
                   >
-                    <span className="block text-[10px] font-medium text-charcoal/60">
+                    <span
+                      className={`block text-[10px] font-medium ${
+                        isSelected ? 'font-semibold text-charcoal' : 'text-charcoal/60'
+                      }`}
+                    >
                       {t.label}
                     </span>
                     <span className="mt-0.5 block text-xs font-bold tabular-nums text-charcoal">
                       {formatMXN(t.price)}
                     </span>
-                  </div>
+                  </button>
                 );
               })}
             </div>
@@ -157,11 +184,15 @@ export function ProductCard({
             type="button"
             whileTap={{ scale: 0.97 }}
             transition={springTransition}
-            onClick={() => openCustomizer(product)}
+            onClick={() => openCustomizer(product, undefined, initialQty)}
             className="mt-5 inline-flex min-h-[46px] w-full items-center justify-center gap-2 rounded-full border border-charcoal bg-charcoal px-4 py-2.5 text-xs font-semibold tracking-wide text-bone transition-colors hover:bg-charcoal/90"
           >
             <PencilRuler className="h-3.5 w-3.5 text-gold" />
-            <span>Personalizar y Cotizar</span>
+            <span>
+              {selectedTier > 1
+                ? `Personalizar y Cotizar (${initialQty}+ pzas)`
+                : 'Personalizar y Cotizar'}
+            </span>
           </motion.button>
         </div>
       </SpotlightCard>
