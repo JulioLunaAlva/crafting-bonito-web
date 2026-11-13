@@ -104,16 +104,23 @@ export function Footer() {
 
         {/* Bottom Copyright */}
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-charcoal/[0.08] pt-6 text-xs text-charcoal/55 sm:flex-row">
-          <div className="text-center sm:text-left">
-            <p className="font-serif text-base text-charcoal/80">
-              Crafting Bonito · Momentos de Luz &amp; Blanca Navidad
-            </p>
-            <p className="mt-0.5 font-serif text-sm italic text-gold">
-              ¡Hacemos puras cosas bonitas!
-            </p>
-            <p className="mt-0.5 text-[11px] uppercase tracking-[0.16em] text-charcoal/55">
-              Eventos Sociales &amp; Regalos Corporativos · CDMX
-            </p>
+          <div className="flex flex-col items-center gap-3 text-center sm:flex-row sm:text-left">
+            <img
+              src={`${import.meta.env.BASE_URL}images/brand/logo-cb.png`}
+              alt="Logo Crafting Bonito"
+              className="h-14 w-14 shrink-0 rounded-full border border-charcoal/15 object-cover shadow-sm"
+            />
+            <div>
+              <p className="font-serif text-base text-charcoal/80">
+                Crafting Bonito · Momentos de Luz &amp; Blanca Navidad
+              </p>
+              <p className="mt-0.5 font-serif text-sm italic text-gold">
+                ¡Hacemos puras cosas bonitas!
+              </p>
+              <p className="mt-0.5 text-[11px] uppercase tracking-[0.16em] text-charcoal/55">
+                Eventos Sociales &amp; Regalos Corporativos · CDMX
+              </p>
+            </div>
           </div>
           <p className="font-mono text-[11px]">
             100% Cera de Soya Natural · Hecho a mano en México

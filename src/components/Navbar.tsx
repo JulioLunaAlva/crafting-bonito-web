@@ -39,8 +39,13 @@ export function Navbar() {
       <header className="border-b border-charcoal/[0.1] bg-cream/90 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-3.5 lg:px-8">
           {/* Editorial Brand Lockup */}
-          <a href="#inicio" className="group flex min-w-0 items-center gap-3">
-            <span className="truncate font-serif text-[22px] font-semibold tracking-tight text-charcoal transition-colors group-hover:text-charcoal/80 sm:text-3xl">
+          <a href="#inicio" className="group flex min-w-0 items-center gap-2.5 sm:gap-3">
+            <img
+              src={`${import.meta.env.BASE_URL}images/brand/logo-cb.png`}
+              alt="Logo Crafting Bonito"
+              className="h-9 w-9 shrink-0 rounded-full object-cover ring-1 ring-charcoal/15 shadow-sm transition-transform duration-300 group-hover:scale-105 sm:h-11 sm:w-11"
+            />
+            <span className="truncate font-serif text-[21px] font-semibold tracking-tight text-charcoal transition-colors group-hover:text-charcoal/80 sm:text-3xl">
               Crafting Bonito
             </span>
             <span className="hidden h-5 w-px bg-charcoal/20 sm:block" />

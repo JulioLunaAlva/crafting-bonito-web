@@ -10,7 +10,6 @@ import {
   MessageCircle,
   Minus,
   Plus,
-  ShoppingBag,
   Sparkles,
   Trash2,
   X,
@@ -92,9 +91,11 @@ export function QuoteDrawer() {
             {/* Header */}
             <div className="shrink-0 flex items-center justify-between border-b border-charcoal/[0.08] bg-cream/80 px-4 py-3.5 sm:px-6 sm:py-4">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-gold/30 bg-gold/10 text-gold">
-                  <ShoppingBag className="h-5 w-5" />
-                </div>
+                <img
+                  src={`${import.meta.env.BASE_URL}images/brand/logo-cb.png`}
+                  alt="Crafting Bonito"
+                  className="h-11 w-11 shrink-0 rounded-full border border-charcoal/15 object-cover shadow-sm"
+                />
                 <div>
                   <h3 className="font-serif text-2xl font-semibold text-charcoal">
                     Tu Cotización
@@ -121,9 +122,11 @@ export function QuoteDrawer() {
             <div className="flex-1 overflow-y-auto overscroll-contain px-4 py-4 sm:px-6 sm:py-5">
               {items.length === 0 ? (
                 <div className="flex h-full flex-col items-center justify-center py-12 text-center">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-charcoal/10 bg-cream text-gold">
-                    <Sparkles className="h-7 w-7" />
-                  </div>
+                  <img
+                    src={`${import.meta.env.BASE_URL}images/brand/logo-cb.png`}
+                    alt="Crafting Bonito"
+                    className="h-20 w-20 rounded-full border border-charcoal/15 object-cover shadow-craft-card"
+                  />
                   <h4 className="mt-4 font-serif text-2xl font-semibold text-charcoal">
                     Aún no agregas velas a tu cotización
                   </h4>

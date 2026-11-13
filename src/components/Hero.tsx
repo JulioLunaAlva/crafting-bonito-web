@@ -195,31 +195,20 @@ export function Hero() {
           className="relative lg:col-span-6"
         >
           <div className="relative mx-auto max-w-md lg:ml-auto lg:mr-4 lg:max-w-[460px]">
-            {/* Rotating Circular Atelier Seal */}
-            <div
+            {/* Official Atelier Medallion Seal */}
+            <motion.div
               aria-hidden="true"
-              className="pointer-events-none absolute -right-4 -top-5 z-20 hidden h-24 w-24 items-center justify-center rounded-full bg-cream/90 p-1 shadow-sm backdrop-blur-sm sm:flex"
+              initial={{ opacity: 0, scale: 0.85, rotate: -8 }}
+              animate={{ opacity: 1, scale: 1, rotate: 0 }}
+              transition={{ ...springTransition, delay: 0.25 }}
+              className="pointer-events-none absolute -right-2 -top-4 z-20 flex h-20 w-20 items-center justify-center rounded-full border border-gold/45 bg-bone/95 p-1 shadow-craft-card backdrop-blur-sm sm:-right-5 sm:-top-6 sm:h-28 sm:w-28 sm:p-1.5"
             >
-              <motion.svg
-                viewBox="0 0 120 120"
-                animate={{ rotate: 360 }}
-                transition={{ duration: 24, repeat: Infinity, ease: 'linear' }}
-                className="h-full w-full"
-              >
-                <defs>
-                  <path
-                    id="atelier-circle"
-                    d="M 60, 60 m -44, 0 a 44,44 0 1,1 88,0 a 44,44 0 1,1 -88,0"
-                  />
-                </defs>
-                <text className="fill-charcoal/80 text-[9.3px] font-semibold uppercase tracking-[0.23em]">
-                  <textPath href="#atelier-circle" startOffset="0%">
-                    ARTESANÍA MEXICANA · 100% CERA DE SOYA ·
-                  </textPath>
-                </text>
-              </motion.svg>
-              <span className="absolute h-2 w-2 rounded-full bg-gold" />
-            </div>
+              <img
+                src={`${import.meta.env.BASE_URL}images/brand/logo-cb.png`}
+                alt="Sello Crafting Bonito Ciudad de México"
+                className="h-full w-full rounded-full object-cover"
+              />
+            </motion.div>
 
             {/* Main Arch Framed Portrait with gentle upward scroll parallax */}
             <motion.div
